@@ -17,10 +17,10 @@ use Filament\Forms;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
-use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Jobs\SendPdfEmailJob;
 
 class ManageLaporan extends ManageRecords
 {
@@ -64,6 +64,11 @@ class ManageLaporan extends ManageRecords
                         ->required()
                         ->default(date('Y')),
 
+                    Forms\Components\TextInput::make('nama')
+                        ->label('Nama Penerima')
+                        ->required()
+                        ->placeholder('Masukkan nama penerima'),
+
                     Forms\Components\TextInput::make('email')
                         ->email()
                         ->required(),
@@ -89,45 +94,31 @@ class ManageLaporan extends ManageRecords
     protected function generateAndSendPdf(array $data): void
     {
         try {
-            $filteredData = LaporanKeuangan::query()
+            $count = LaporanKeuangan::query()
                 ->whereYear('tanggal', $data['tahun'])
                 ->whereMonth('tanggal', $data['bulan'])
-                ->get();
+                ->count();
 
-            if ($filteredData->isEmpty()) {
-                Notification::make()
-                    ->title('Data kosong')
-                    ->body('Tidak ada transaksi pada periode ini')
-                    ->warning()
-                    ->send();
+            if ($count === 0) {
+                Notification::make()->title('Data kosong')->warning()->send();
                 return;
             }
 
-            $pdf = Pdf::loadView('exports.laporan-keuangan', [
-                'incomes' => $filteredData->where('tipe', 'income'),
-                'outcomes' => $filteredData->where('tipe', 'outcome'),
-                'bulan' => $data['bulan'],
-                'tahun' => $data['tahun'],
-            ])->output();
-
             Mail::to($data['email'])
-                ->send(new \App\Mail\LaporanKeuanganMail(
-                    $pdf,
-                    $data
-                ));
+            ->send(new \App\Mail\LaporanKeuanganMail(
+                (int) $data['bulan'],
+                (int) $data['tahun'],
+                $data
+            ));
 
             Notification::make()
-                ->title('Berhasil')
-                ->body('PDF berhasil dikirim')
+                ->title('Antrean Dimulai')
+                ->body('Laporan sedang diproses dan akan dikirim ke email Anda.')
                 ->success()
                 ->send();
 
         } catch (\Exception $e) {
-            Notification::make()
-                ->title('Gagal')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
+            Notification::make()->title('Gagal')->body($e->getMessage())->danger()->send();
         }
     }
 
@@ -206,7 +197,7 @@ class ManageLaporan extends ManageRecords
 
                 Tables\Filters\Filter::make('tanggal')
                     ->form([
-                        Forms\Components\DatePicker::make('from'),
+                        Forms\Components\DatePicker::make('from'),  
                         Forms\Components\DatePicker::make('to'),
                     ])
                     ->query(function (Builder $query, array $data) {

@@ -1,9 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\IncomeController;
-use App\Http\Controllers\OutcomeController;
-use App\Models\Income;
+use App\Filament\Resources\IncomeResource;
+use App\Filament\Resources\OutcomeResource;
 use App\Models\Outcome;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -11,8 +10,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::resource('incomes', IncomeController::class);
-Route::resource('outcomes', OutcomeController::class);
+Route::resource('incomes', IncomeResource::class);
+Route::resource('outcomes',OutcomeResource::class);
 
 Route::get('/laporan/export-pdf', function () {
 
@@ -25,4 +24,13 @@ Route::get('/laporan/export-pdf', function () {
     ])->setPaper('a4', 'portrait');
 
     return $pdf->download('laporan-keuangan.pdf');
+});
+
+Route::get('/emails', function () {
+    return view('emails.laporan', [
+        'bulan' => 'April',
+        'tahun' => '2026',
+        'nama' => 'Bapak/Ibu',
+        'pesan' => 'Laporan keuangan berkala Anda telah siap untuk ditinjau. Kami telah merangkum aktivitas keuangan Anda untuk periode berikut:'
+    ]);
 });

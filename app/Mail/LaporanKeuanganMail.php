@@ -1,32 +1,50 @@
 <?php
+
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue; 
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\LaporanKeuangan; 
+use Illuminate\Support\Facades\Log;
 
-class LaporanKeuanganMail extends Mailable
+class LaporanKeuanganMail extends Mailable implements ShouldQueue 
 {
     use Queueable, SerializesModels;
 
-    public $pdf;
-    public $bulan;
-    public $tahun;
-    public $pesan;
-
-    public function __construct($pdf, $data)
-    {
-        $this->pdf = $pdf;
-        $this->bulan = $data['bulan'];
-        $this->tahun = $data['tahun'];
-        $this->pesan = $data['pesan'] ?? null;
-    }
+    public function __construct(
+        public int $bulan,
+        public int $tahun,
+        public array $formData
+    ) {}
 
     public function build()
     {
-        return $this->subject('Laporan Keuangan '.$this->bulan.'/'.$this->tahun)
+        Log::info('Worker memproses email: ' . $this->formData['email']);
+
+    $dataLaporan = LaporanKeuangan::query()
+        ->whereYear('tanggal', $this->tahun)
+        ->whereMonth('tanggal', $this->bulan)
+        ->get();        
+
+        $pdf = Pdf::loadView('exports.laporan-keuangan', [
+            'incomes' => $dataLaporan->where('tipe', 'income'),
+            'outcomes' => $dataLaporan->where('tipe', 'outcome'),
+            'bulan' => $this->formData['bulan'],
+            'tahun' => $this->formData['tahun'],
+        ])->output();
+
+        return $this->subject('Laporan Keuangan - ' . $this->formData['nama'])
             ->view('emails.laporan')
-            ->attachData($this->pdf, 'laporan-keuangan.pdf', [
+            ->with([
+                'pesan' => $this->formData['pesan'],
+                'nama'  => $this->formData['nama'],
+                'bulan' => $this->formData['bulan'], 
+                'tahun' => $this->formData['tahun'], 
+            ])
+            ->attachData($pdf, 'Laporan_Keuangan.pdf', [
                 'mime' => 'application/pdf',
             ]);
     }

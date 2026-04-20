@@ -16,7 +16,7 @@ class FinancialChartWidget extends ChartWidget
 
     public function getHeading(): string
     {
-        return 'Grafik Tren Keuangan (Berdasarkan Filter)';
+        return 'Grafik Tren Keuangan';
     }
 
     protected function getTablePage(): string
