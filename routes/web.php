@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Filament\Resources\IncomeResource;
 use App\Filament\Resources\OutcomeResource;
+use App\Models\Income;
 use App\Models\Outcome;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -28,7 +29,7 @@ Route::get('/laporan/export-pdf', function () {
 
 Route::get('/emails', function () {
     return view('emails.laporan', [
-        'bulan' => 'April',
+        'bulan' => '04',
         'tahun' => '2026',
         'nama' => 'Bapak/Ibu',
         'pesan' => 'Laporan keuangan berkala Anda telah siap untuk ditinjau. Kami telah merangkum aktivitas keuangan Anda untuk periode berikut:'

@@ -32,8 +32,9 @@ class LaporanKeuanganMail extends Mailable implements ShouldQueue
         $pdf = Pdf::loadView('exports.laporan-keuangan', [
             'incomes' => $dataLaporan->where('tipe', 'income'),
             'outcomes' => $dataLaporan->where('tipe', 'outcome'),
-            'bulan' => $this->formData['bulan'],
-            'tahun' => $this->formData['tahun'],
+
+            'bulan' => $this->bulan,
+            'tahun' => $this->tahun,
         ])->output();
 
         return $this->subject('Laporan Keuangan - ' . $this->formData['nama'])

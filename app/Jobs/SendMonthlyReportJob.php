@@ -21,10 +21,9 @@ class SendMonthlyReportJob implements ShouldQueue
 
     public function handle(): void
     {
-        $now = Carbon::now();
-
-        $bulan = (int) $now->subMonth()->format('m');
-        $tahun = (int) $now->format('Y');
+        $lastMonth = Carbon::now()->subMonth();
+        $bulan = $lastMonth->month;
+        $tahun = $lastMonth->year;
 
         $laporan = LaporanKeuangan::query()
             ->whereYear('tanggal', $tahun)
@@ -46,14 +45,15 @@ class SendMonthlyReportJob implements ShouldQueue
                 'tahun' => $tahun,
             ];
 
-            Mail::to($user->email)->send(
+            Mail::to($user->email)->queue(
                 new LaporanKeuanganMail(
                     $bulan,
                     $tahun,
-                    $formData,
-                    $laporan     
+                    $formData
                 )
             );
+
+            sleep(20);
         }
     }
 }
