@@ -12,11 +12,10 @@ use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 
-
-class IncomeResource extends Resource
+class IncomeResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Income::class;
 
@@ -51,4 +50,23 @@ class IncomeResource extends Resource
             'edit' => EditIncome::route('/{record}/edit'),
         ];
     }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+        ];
+    }
+
 }
