@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Incomes\Tables;
 
-use App\Helpers\CategoryHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,14 +24,15 @@ class IncomesTable
                 TextColumn::make('sumber')
                     ->label('Sumber')
                     ->searchable(),
-                TextColumn::make('kategori')
+                TextColumn::make('category.name') 
                     ->label('Kategori')
+                    ->badge() 
+                    ->color('success')
                     ->searchable(),
                 TextColumn::make('nominal')
                     ->label('Nominal')
                     ->money('IDR')
-                    ->sortable()
-                    ->alignRight(),
+                    ->sortable(),
                 TextColumn::make('keterangan')
                     ->label('Keterangan')
                     ->limit(50)
@@ -44,14 +44,20 @@ class IncomesTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label('Diperbarui')
-                    ->dateTime('d M Y H:i')
+                    ->dateTime('d M Y ')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('kategori')
+                SelectFilter::make('category_id')
                     ->label('Kategori')
-                    ->options(CategoryHelper::getIncomeCategories()),
+                    ->relationship('category', 'name', fn ($query) => 
+                        $query->where('type', 'income') 
+                              ->orderByRaw("CASE WHEN name LIKE '%Lainlain%' THEN 1 ELSE 0 END ASC")
+                              ->orderBy('name', 'asc')
+                    )
+                    ->searchable()
+                    ->preload(),
                 Filter::make('tanggal')
                     ->label('Filter Tanggal')
                     ->form([

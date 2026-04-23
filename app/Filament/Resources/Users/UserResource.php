@@ -11,6 +11,7 @@ use App\Filament\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Resources\Users\Tables\UsersTable;
 use App\Models\User;
 use BackedEnum;
+use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -21,6 +22,8 @@ class UserResource extends Resource implements HasShieldPermissions
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
+    protected static string|UnitEnum|null $navigationGroup = 'Master Data';
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {
@@ -37,7 +40,6 @@ class UserResource extends Resource implements HasShieldPermissions
         return UsersTable::configure($table);
     }
 
-    // WAJIB ADA karena implements HasShieldPermissions
     public static function getPermissionPrefixes(): array
     {
         return [

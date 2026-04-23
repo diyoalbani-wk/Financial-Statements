@@ -20,7 +20,6 @@ use Illuminate\Support\Facades\Mail;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Jobs\SendPdfEmailJob;
 
 class ManageLaporan extends ManageRecords
 {
@@ -176,10 +175,11 @@ class ManageLaporan extends ManageRecords
             ->columns([
                 Tables\Columns\TextColumn::make('tanggal')->date()->sortable(),
                 Tables\Columns\TextColumn::make('tipe_label')->badge(),
-                Tables\Columns\TextColumn::make('kategori')->badge(),
+                Tables\Columns\TextColumn::make('category.name') 
+                    ->label('Kategori')
+                    ->badge(),
                 Tables\Columns\TextColumn::make('nominal')->money('IDR'),
             ])
-
             ->filters([
                 Tables\Filters\SelectFilter::make('tipe')
                     ->options([
@@ -187,13 +187,9 @@ class ManageLaporan extends ManageRecords
                         'outcome' => 'Pengeluaran',
                     ]),
 
-                Tables\Filters\SelectFilter::make('kategori')
-                    ->options(function () {
-                        return array_merge(
-                            Income::getCategories(),
-                            Outcome::getCategories()
-                        );
-                    }),
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Kategori')
+                    ->options(\App\Models\Category::pluck('name', 'id')), 
 
                 Tables\Filters\Filter::make('tanggal')
                     ->form([
@@ -207,4 +203,5 @@ class ManageLaporan extends ManageRecords
                     }),
             ]);
     }
+
 }

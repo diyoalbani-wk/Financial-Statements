@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Outcomes\Tables;
 
-use App\Helpers\CategoryHelper;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,14 +24,15 @@ class OutcomesTable
                 TextColumn::make('tujuan')
                     ->label('Tujuan')
                     ->searchable(),
-                TextColumn::make('kategori')
+                TextColumn::make('category.name')
                     ->label('Kategori')
+                    ->badge() 
+                    ->color('success')
                     ->searchable(),
                 TextColumn::make('nominal')
                     ->label('Nominal')
                     ->money('IDR')
-                    ->sortable()
-                    ->alignRight(),
+                    ->sortable(),
                 TextColumn::make('keterangan')
                     ->label('Keterangan')
                     ->limit(50)
@@ -49,9 +49,15 @@ class OutcomesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('kategori')
+                SelectFilter::make('category_id')
                     ->label('Kategori')
-                    ->options(CategoryHelper::getOutcomeCategories()),
+                    ->relationship('category', 'name', fn ($query) => 
+                        $query->where('type', 'outcome') 
+                              ->orderByRaw("CASE WHEN name LIKE '%Lainnya%' THEN 1 ELSE 0 END ASC")
+                              ->orderBy('name', 'asc')
+                    )
+                    ->searchable()
+                    ->preload(),
                 Filter::make('tanggal')
                     ->label('Filter Tanggal')
                     ->form([

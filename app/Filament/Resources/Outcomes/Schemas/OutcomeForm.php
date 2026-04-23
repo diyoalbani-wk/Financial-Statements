@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Outcomes\Schemas;
 
-use App\Helpers\CategoryHelper;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,11 +22,16 @@ class OutcomeForm
                     ->label('Tujuan')
                     ->required()
                     ->maxLength(255),
-                Select::make('kategori')
+                Select::make('category_id')
                     ->label('Kategori')
-                    ->required()
-                    ->options(CategoryHelper::getOutcomeCategories())
-                    ->native(false),
+                    ->relationship('category', 'name', function ($query) {
+                        return $query->where('type', 'outcome')
+                        ->where('is_active', true)
+                        ->orderByRaw("CASE WHEN name LIKE '%Lainlain%' THEN 1 ELSE 0 END ASC")
+                        ->orderBy('name', 'asc');;
+                    })
+                    ->native(false)
+                    ->required(),
                 TextInput::make('nominal')
                     ->label('Nominal')
                     ->required()

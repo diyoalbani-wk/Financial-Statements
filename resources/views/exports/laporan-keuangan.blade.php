@@ -35,7 +35,8 @@
                 <tr>
                     <td>{{ \Carbon\Carbon::parse($income->tanggal)->format('d M Y') }}</td>
                     <td class="text-center">Pemasukan</td>
-                    <td>{{ $income->kategori }}</td>
+                    <!-- Ganti $income->kategori jadi $income->category->name -->
+                    <td>{{ $income->category?->name ?? 'Tanpa Kategori' }}</td>
                     <td class="text-right">Rp {{ number_format($income->nominal,0,',','.') }}</td>
                 </tr>
                 @endforeach
@@ -44,7 +45,8 @@
                 <tr>
                     <td>{{ \Carbon\Carbon::parse($outcome->tanggal)->format('d M Y') }}</td>
                     <td class="text-center">Pengeluaran</td>
-                    <td>{{ $outcome->kategori }}</td>
+                    <!-- Ganti $outcome->kategori jadi $outcome->category->name -->
+                    <td>{{ $outcome->category?->name ?? 'Tanpa Kategori' }}</td>
                     <td class="text-right">Rp {{ number_format($outcome->nominal,0,',','.') }}</td>
                 </tr>
                 @endforeach

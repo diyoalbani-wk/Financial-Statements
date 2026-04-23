@@ -35,8 +35,6 @@ class SendMonthlyReportJob implements ShouldQueue
         }
 
         $users = User::all();
-        // $users = User::role('super admin')->get();
-        // $users = User::role(['super admin', 'admin income', 'admin outcome'])->get();
 
         foreach ($users as $user) {
             $formData = [

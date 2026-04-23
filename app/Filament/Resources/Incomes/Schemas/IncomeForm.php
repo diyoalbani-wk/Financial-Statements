@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Incomes\Schemas;
 
-use App\Helpers\CategoryHelper;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,11 +22,15 @@ class IncomeForm
                     ->label('Sumber')
                     ->required()
                     ->maxLength(255),
-                Select::make('kategori')
+                Select::make('category_id')
                     ->label('Kategori')
-                    ->required()
-                    ->options(CategoryHelper::getIncomeCategories())
-                    ->native(false),
+                    ->relationship('category', 'name', function ($query) {
+                        return $query->where('type', 'income')
+                        ->where('is_active', true)
+                        ->orderByRaw("CASE WHEN name LIKE '%Lainnya%' THEN 1 ELSE 0 END ASC")
+                        ->orderBy('name', 'asc');;
+                    })
+                    ->required(),
                 TextInput::make('nominal')
                     ->label('Nominal')
                     ->required()
